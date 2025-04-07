@@ -50,8 +50,31 @@ jobs:
           name: xiaomi-nabu_NOSB.img
           path: |
             xiaomi-nabu_NOSB.img
+  build-dbkp:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: rodriguezst/DualBootKernelPatcher
+          ref: PStore
+          path: DBKP
+      - name: Build DBKP & Shellcodes
+        run: |
+          pushd DBKP
+          cmake -B ./Build -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Release
+          cmake --build ./Build --config Release --target all
+          popd
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DualBootKernelPatcher
+          path: |
+            DBKP/Build/DualBootKernelPatcher
+            DBKP/Build/DualBootKernelRemover
+            DBKP/Build/ShellCode/*.bin
+            DBKP/Config/*.cfg
   build-installer:
-    needs: [build-uefi]
+    needs: [build-uefi, build-dbkp]
     strategy:
       matrix:
         uefi-type: [SB, NOSB]
@@ -67,20 +90,17 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: SM8150_EFI_${{ matrix.uefi-type }}.fd
+      - uses: actions/download-artifact@v4
+        with:
+          name: DualBootKernelPatcher
+          path: DBKP
       - name: Build Zip Installer (${{ matrix.uefi-type }})
         run: |
           mv SM8150_EFI_${{ matrix.uefi-type }}.fd Flashable_UEFI_Installer/SM8150_EFI.fd
-          wget -nv "https://github.com/Project-Aloha/DualBootKernelPatcher/releases/download/v1.2.0.0/DualBootKernelPatcher-Linux-arm64.zip"
-          unzip DualBootKernelPatcher-Linux-arm64.zip
-          mv DualBootKernelPatcher Flashable_UEFI_Installer/DualBootKernelPatcher
+          mv DBKP/Build/DualBootKernelPatcher Flashable_UEFI_Installer/DualBootKernelPatcher
           chmod +x Flashable_UEFI_Installer/DualBootKernelPatcher
-          wget -nv "https://github.com/Project-Aloha/DualBootKernelPatcher/releases/download/v1.2.0.0/Shellcodes.zip"
-          unzip Shellcodes.zip
-          mv ShellCode.Nabu.bin Flashable_UEFI_Installer/ShellCode.Nabu.bin
-          wget -nv "https://github.com/Project-Aloha/DualBootKernelPatcher/releases/download/v1.2.0.0/Config.zip"
-          unzip Config.zip
-          mv Config/DualBoot.Sm8150.cfg Flashable_UEFI_Installer/DualBoot.Sm8150.cfg
-          chmod +x Flashable_UEFI_Installer/DualBootKernelPatcher
+          mv DBKP/Build/ShellCode/ShellCode.Nabu.bin Flashable_UEFI_Installer/ShellCode.Nabu.bin
+          mv DBKP/Config/DualBoot.Sm8150.cfg Flashable_UEFI_Installer/DualBoot.Sm8150.cfg
           cd Flashable_UEFI_Installer
           ./pack.sh
           mv installer.zip installer_${{ matrix.uefi-type }}.zip
