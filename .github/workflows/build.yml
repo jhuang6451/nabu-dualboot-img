@@ -78,6 +78,7 @@ jobs:
     strategy:
       matrix:
         uefi-type: [SB, NOSB]
+        dualboot-type: [case, bootmanager]
     runs-on: ubuntu-latest
     steps:
       - id: time
@@ -95,20 +96,24 @@ jobs:
           name: DualBootKernelPatcher
           path: DBKP
       - name: Build Zip Installer (${{ matrix.uefi-type }})
+        shell: bash
         run: |
+          if [[ "${{ matrix.dualboot-type }}" == "bootmanager" ]]; then
+            SHELLCODE="PStore"
+          fi
           mv SM8150_EFI_${{ matrix.uefi-type }}.fd Flashable_UEFI_Installer/SM8150_EFI.fd
           mv DBKP/Build/DualBootKernelPatcher Flashable_UEFI_Installer/DualBootKernelPatcher
           chmod +x Flashable_UEFI_Installer/DualBootKernelPatcher
-          mv DBKP/Build/ShellCode/ShellCode.Nabu.bin Flashable_UEFI_Installer/ShellCode.Nabu.bin
+          mv DBKP/Build/ShellCode/ShellCode.Nabu${SHELLCODE}.bin Flashable_UEFI_Installer/ShellCode.Nabu${SHELLCODE}.bin
           mv DBKP/Config/DualBoot.Sm8150.cfg Flashable_UEFI_Installer/DualBoot.Sm8150.cfg
           cd Flashable_UEFI_Installer
           ./pack.sh
-          mv installer.zip installer_${{ matrix.uefi-type }}.zip
+          mv installer.zip installer_${{ matrix.dualboot-type }}_${{ matrix.uefi-type }}.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: installer_${{ matrix.uefi-type }}.zip
+          name: installer_${{ matrix.dualboot-type }}_${{ matrix.uefi-type }}.zip
           path: |
-            Flashable_UEFI_Installer/installer_${{ matrix.uefi-type }}.zip
+            Flashable_UEFI_Installer/installer_${{ matrix.dualboot-type }}_${{ matrix.uefi-type }}.zip
       - name: Release assets
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -122,5 +127,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            Flashable_UEFI_Installer/installer_${{ matrix.uefi-type }}.zip
+            Flashable_UEFI_Installer/installer_${{ matrix.dualboot-type }}_${{ matrix.uefi-type }}.zip
 

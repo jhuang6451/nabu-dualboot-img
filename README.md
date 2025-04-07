@@ -1,12 +1,39 @@
-# DualBoot installer for Xiaomi Pad 5 (nabu)
-This repository generates Zip Installers (for Magisk/Recovery) to enable dualbooting on Xiaomi Pad 5 using magnetic cover.
+# DualBoot Installer for Xiaomi Pad 5 (nabu)
+This repository generates ZIP installers (for Magisk/Recovery) to enable dual booting on the Xiaomi Pad 5.
 
-- If the tablet is (re)booted with the **magnetic cover closed -> Android** kernel will be started
-- If the tablet is (re)booted with the **magnetic cover open -> UEFI** from [Project-Aloha](https://github.com/Project-Aloha/mu_aloha_platforms) will be started
+There are two options for dual booting:
 
-**SB (SecureBoot enabled)** and **NOSB (SecureBoot disabled)** variants are generated.
-## Installation ##
-Download the Zip in the variant you need (SecureBoot enabled or not) and flash it using Magisk Manager or TWRP recovery.
+### 1. Using a magnetic cover:
+- If the tablet is (re)booted with the `magnetic cover closed`, the Android kernel will start.
+- If the tablet is (re)booted with the `magnetic cover open`, UEFI from [Project-Aloha](https://github.com/Project-Aloha/mu_aloha_platforms) will start.
+
+### 2. Using a software boot manager (like [rEFInd](https://sourceforge.net/projects/refind/)):
+- The tablet will always boot to the software boot menu with an option to `Reboot to Android`.
+- When the `Reboot to Android` option is selected, the tablet will reboot, and the Android kernel will start.
+### `SB` (Secure Boot enabled) and `NOSB` (Secure Boot disabled) installers are generated for both options.
+
+## Installation
+
+1. Download the ZIP file in the variant you need (**`installer_{case/bootmanager}_{SB/NOSB}.zip`**) and flash it using Magisk Manager or TWRP recovery.
+2. (For the software boot manager option only) Install the boot manager and the [`Reboot to Android`](https://github.com/rodriguezst/Reboot2AndroidPkg/releases) app in your EFI System Partition (ESP). For rEFInd, the partition should contain the following structure:
+```
+[ESP Partition]
+└── EFI
+    ├── BOOT
+    │   ├── BOOTAA64.EFI (renamed from refindaa64.efi)
+    │   ├── icons (rEFInd icons directory)
+    │   └── refind.conf (rEFInd configuration file)
+    └── android
+        └── Reboot2Android.efi
+```
+## How it works
+
+The Android kernel in `boot.img` is patched to include both the Android kernel and UEFI, along with a small selection logic to jump to a specific section of the binary (Android kernel or UEFI).
+
+In the magnetic cover option, this selection logic checks the status of the magnetic sensor on the tablet to decide which section to boot.
+
+In the boot manager option, the selection logic reads a specific memory address and checks if a certain pattern is present at that address. If the pattern is not found (as happens on every cold boot), UEFI is launched. When the `Reboot to Android` app is launched, that pattern is written to the memory address, and a warm reboot is triggered. On the next boot, the selection logic will find the matching pattern and boot the Android kernel.
+
 ## Credits
 [DualBootKernelPatcher](https://github.com/Project-Aloha/DualBootKernelPatcher)
 
