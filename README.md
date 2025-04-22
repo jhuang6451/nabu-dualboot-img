@@ -10,7 +10,7 @@ There are two options for dual booting:
 ### 2. Using a software boot manager (like [rEFInd](https://sourceforge.net/projects/refind/)):
 - The tablet will always boot to the software boot menu with an option to `Reboot to Android`.
 - When the `Reboot to Android` option is selected, the tablet will reboot, and the Android kernel will start.
-### `SB` (Secure Boot enabled) and `NOSB` (Secure Boot disabled) installers are generated for both options.
+### `SB` (Secure Boot enabled) and `NOSB` (Secure Boot disabled) installers are generated for both options. If you just plan to dualboot between Windows and Android you can easily choose the SECURE BOOT enabled `case` version. If you want to use the `boot manager` version check [custom-sb-keys](https://github.com/rodriguezst/nabu-dualboot-img/tree/custom-sb-keys?tab=readme-ov-file#how-to-add-your-own-secure-boot-keys-as-trusted-in-uefi) branch for the extra steps needed to build UEFI with your own keys and sign EFI binaries with those keys.
 
 ## Installation
 
