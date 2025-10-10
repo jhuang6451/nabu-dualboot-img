@@ -15,7 +15,7 @@ There are two options for dual booting:
 ## Installation
 
 1. Download the ZIP file in the variant you need (**`installer_{case/bootmanager}_{SB/NOSB}.zip`**) and flash it using Magisk Manager or TWRP recovery.
-2. (For the software boot manager option only) Install the boot manager and the [`Reboot to Android`](https://github.com/rodriguezst/Reboot2AndroidPkg/releases) app in your EFI System Partition (ESP). For rEFInd, the partition should contain the following structure:
+2. (For the software boot manager option only) Install the boot manager (rEFInd, simpleinit...) and the [`Reboot to Android`](https://github.com/rodriguezst/Reboot2AndroidPkg) app in your EFI System Partition (ESP). For rEFInd, the partition should contain the following structure:
 ```
 [ESP Partition]
 └── EFI
@@ -26,6 +26,13 @@ There are two options for dual booting:
     └── android
         └── Reboot2Android.efi
 ```
+
+## Binaries
+
+You can find built binaries for `rEFInd` and `Reboot2Android` here:
+- [Reboot2Android release page](https://github.com/rodriguezst/Reboot2AndroidPkg/releases/latest)
+- [rEFInd-nabu release page](https://github.com/rodriguezst/refind-nabu/releases/latest)
+
 ## How it works
 
 The Android kernel in `boot.img` is patched to include both the Android kernel and UEFI, along with a small selection logic to jump to a specific section of the binary (Android kernel or UEFI).
