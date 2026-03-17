@@ -25,11 +25,14 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git submodule update --init --recursive
           sed -i '/"Kernel"/s/Conv/Reserv/' Platforms/SurfaceDuo1Pkg/Device/xiaomi-nabu/Library/PlatformMemoryMapLib/PlatformMemoryMapLib.c
+          sed -i 's/levenshtein/python-Levenshtein/' pip-requirements.txt
+          sed -i 's/edk2-pytool-library==0.22.5/edk2-pytool-library>=0.23.0/' pip-requirements.txt
+          sed -i 's/edk2-pytool-extensions==0.28.0/edk2-pytool-extensions>=0.29.0/' pip-requirements.txt
           bash scripts/ci_setup.sh && ./build_uefi.py -d xiaomi-nabu
-          find Build/*/ci_artifacts/ -type f -name 'SM8150_EFI_SB.fd' -exec cp '{}' ../SM8150_EFI_SB.fd ';'
-          find Build/*/ci_artifacts/ -type f -name 'xiaomi-nabu_SB.img' -exec cp '{}' ../xiaomi-nabu_SB.img ';'
-          find Build/*/ci_artifacts/ -type f -name 'SM8150_EFI_NOSB.fd' -exec cp '{}' ../SM8150_EFI_NOSB.fd ';'
-          find Build/*/ci_artifacts/ -type f -name 'xiaomi-nabu_NOSB.img' -exec cp '{}' ../xiaomi-nabu_NOSB.img ';'
+          find Build/ -type f -name 'SM8150_EFI_SB.fd' -exec cp '{}' ../SM8150_EFI_SB.fd ';'
+          find Build/ -type f -name 'xiaomi-nabu_SB.img' -exec cp '{}' ../xiaomi-nabu_SB.img ';'
+          find Build/ -type f -name 'SM8150_EFI_NOSB.fd' -exec cp '{}' ../SM8150_EFI_NOSB.fd ';'
+          find Build/ -type f -name 'xiaomi-nabu_NOSB.img' -exec cp '{}' ../xiaomi-nabu_NOSB.img ';'
       - uses: actions/upload-artifact@v4
         with:
           name: SM8150_EFI_SB.fd
@@ -128,4 +131,3 @@ jobs:
           prerelease: false
           files: |
             Flashable_UEFI_Installer/installer_${{ matrix.dualboot-type }}_${{ matrix.uefi-type }}.zip
-
